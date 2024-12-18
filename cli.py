@@ -1,71 +1,168 @@
 import sys
-from models import AudioProducer, DigitalAudioWorkstation, session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Base, AudioProducer, DigitalAudioWorkstation  # Assuming these models are defined in models.py
 
-def list_audio_producers():
-    producers = session.query(AudioProducer).all()
-    for producer in producers:
-        print(f"ID: {producer.id}, Name: {producer.name}")
 
-def list_workstations():
-    workstations = session.query(DigitalAudioWorkstation).all()
-    for workstation in workstations:
-        print(f"ID: {workstation.id}, Name: {workstation.name}, Producer ID: {workstation.producer_id}")
+# Database URL (you can change this to your desired database)
+DATABASE_URL = "sqlite:///audio_producer_app.db"
 
-def add_audio_producer(name):
-    new_producer = AudioProducer(name=name)
-    session.add(new_producer)
+# Set up engine and session
+engine = create_engine(DATABASE_URL)
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Initialize the database
+def init_database():
+    """Initialize the database by creating tables."""
+    Base.metadata.create_all(engine)
+    print("Database created and tables initialized.")
+
+# Create a new audio producer
+def create_audio_producer():
+    """Create a new audio producer."""
+    name = input("Enter Audio Producer's name: ")
+    audio_producer = AudioProducer(name=name)
+    session.add(audio_producer)
     session.commit()
-    print(f"Audio Producer {name} added.")
+    print(f"Audio Producer '{name}' created successfully with ID: {audio_producer.id}")
 
-def add_workstation(name, producer_id):
-    producer = session.query(AudioProducer).filter_by(id=producer_id).first()
+# Update audio producer details
+def update_audio_producer():
+    """Update audio producer details."""
+    producer_id = int(input("Enter Audio Producer's ID to update: "))
+    producer = session.query(AudioProducer).filter(AudioProducer.id == producer_id).first()
+
     if producer:
-        new_workstation = DigitalAudioWorkstation(name=name, producer_id=producer.id)
-        session.add(new_workstation)
+        print(f"Updating details for Producer: {producer.name}")
+        producer.name = input(f"Enter new name (current: {producer.name}): ") or producer.name
         session.commit()
-        print(f"Workstation {name} added for producer {producer.name}.")
+        print(f"Audio Producer {producer.name} updated successfully!")
     else:
-        print("Producer not found.")
+        print("Audio Producer with that ID not found.")
 
-def delete_audio_producer(producer_id):
-    producer = session.query(AudioProducer).filter_by(id=producer_id).first()
+# Delete an audio producer
+def delete_audio_producer():
+    """Delete an audio producer."""
+    producer_id = int(input("Enter Audio Producer's ID to delete: "))
+    producer = session.query(AudioProducer).filter(AudioProducer.id == producer_id).first()
+
     if producer:
         session.delete(producer)
         session.commit()
-        print(f"Audio Producer {producer.name} deleted.")
+        print(f"Audio Producer with ID {producer_id} deleted successfully.")
     else:
-        print("Producer not found.")
+        print("Audio Producer with that ID not found.")
 
-def delete_workstation(workstation_id):
-    workstation = session.query(DigitalAudioWorkstation).filter_by(id=workstation_id).first()
+# List all audio producers
+def list_audio_producers():
+    """List all audio producers."""
+    producers = session.query(AudioProducer).all()
+    if producers:
+        table_data = [['ID', 'Name']]  # Table headers
+        for producer in producers:
+            table_data.append([producer.id, producer.name])
+
+        table = AsciiTable(table_data)  # Create the table
+        print(table.table)  # Print the table
+    else:
+        print("No audio producers found.")
+
+# Create a new digital audio workstation
+def create_workstation():
+    """Create a new digital audio workstation."""
+    name = input("Enter Workstation's name: ")
+    producer_id = int(input("Enter Audio Producer's ID for this workstation: "))
+    
+    producer = session.query(AudioProducer).filter(AudioProducer.id == producer_id).first()
+    if producer:
+        workstation = DigitalAudioWorkstation(name=name, audio_producer_id=producer.id)
+        session.add(workstation)
+        session.commit()
+        print(f"Workstation '{name}' created successfully under Producer '{producer.name}'")
+    else:
+        print(f"Audio Producer with ID {producer_id} not found. Workstation creation failed.")
+
+# Update workstation details
+def update_workstation():
+    """Update workstation details."""
+    workstation_id = int(input("Enter Workstation ID to update: "))
+    workstation = session.query(DigitalAudioWorkstation).filter(DigitalAudioWorkstation.id == workstation_id).first()
+
+    if workstation:
+        print(f"Updating details for Workstation: {workstation.name}")
+        workstation.name = input(f"Enter new name (current: {workstation.name}): ") or workstation.name
+        session.commit()
+        print(f"Workstation {workstation.name} updated successfully!")
+    else:
+        print("Workstation with that ID not found.")
+
+# Delete a workstation
+def delete_workstation():
+    """Delete a workstation."""
+    workstation_id = int(input("Enter Workstation ID to delete: "))
+    workstation = session.query(DigitalAudioWorkstation).filter(DigitalAudioWorkstation.id == workstation_id).first()
+
     if workstation:
         session.delete(workstation)
         session.commit()
-        print(f"Workstation {workstation.name} deleted.")
+        print(f"Workstation with ID {workstation_id} deleted successfully.")
     else:
-        print("Workstation not found.")
+        print("Workstation with that ID not found.")
 
-def main():
-    if len(sys.argv) < 2:
-        print("Please provide a command.")
-        sys.exit(1)
+# List all workstations
+def list_workstations():
+    """List all workstations."""
+    workstations = session.query(DigitalAudioWorkstation).all()
+    if workstations:
+        table_data = [['ID', 'Name', 'Producer ID']]  # Table headers
+        for workstation in workstations:
+            table_data.append([workstation.id, workstation.name, workstation.audio_producer_id])
 
-    command = sys.argv[1]
-
-    if command == 'list_producers':
-        list_audio_producers()
-    elif command == 'list_workstations':
-        list_workstations()
-    elif command == 'add_producer' and len(sys.argv) == 3:
-        add_audio_producer(sys.argv[2])
-    elif command == 'add_workstation' and len(sys.argv) == 4:
-        add_workstation(sys.argv[2], int(sys.argv[3]))
-    elif command == 'delete_producer' and len(sys.argv) == 3:
-        delete_audio_producer(int(sys.argv[2]))
-    elif command == 'delete_workstation' and len(sys.argv) == 3:
-        delete_workstation(int(sys.argv[2]))
+        table = AsciiTable(table_data)  # Create the table
+        print(table.table)  # Print the table
     else:
-        print("Invalid command or missing arguments.")
+        print("No workstations found.")
 
+# Main Menu Function
+def main_menu():
+    """Display the main menu and handle user choices."""
+    while True:
+        print("\nWelcome to the Audio Management System!")
+        print("1. Add a new Audio Producer")
+        print("2. Update Audio Producer details")
+        print("3. Delete Audio Producer details")
+        print("4. List all Audio Producers")
+        print("5. Add a new Workstation")
+        print("6. Update Workstation details")
+        print("7. Delete Workstation details")
+        print("8. List all Workstations")
+        print("9. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            create_audio_producer()
+        elif choice == "2":
+            update_audio_producer()
+        elif choice == "3":
+            delete_audio_producer()
+        elif choice == "4":
+            list_audio_producers()
+        elif choice == "5":
+            create_workstation()
+        elif choice == "6":
+            update_workstation()
+        elif choice == "7":
+            delete_workstation()
+        elif choice == "8":
+            list_workstations()
+        elif choice == "9":
+            print("Thank you for using the Audio Management System. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+# Uncomment and run the database initialization if needed
 if __name__ == "__main__":
-    main()
+    init_database()  # Initialize the database tables
+    main_menu()  # Start the main menu
