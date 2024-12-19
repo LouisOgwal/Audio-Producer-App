@@ -2,10 +2,10 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 from sqlalchemy import create_engine
 
-# Create a base class for the models
+
 Base = declarative_base()
 
-# Define the AudioProducer model
+
 class AudioProducer(Base):
     __tablename__ = 'audio_producers' 
 
@@ -16,7 +16,7 @@ class AudioProducer(Base):
     def __repr__(self): 
         return f'<AudioProducer(id={self.id}, name="{self.name}")>'
 
-# Define the DigitalAudioWorkstation model
+
 class DigitalAudioWorkstation(Base):
     __tablename__ = 'digital_audio_workstations' 
 
@@ -28,14 +28,14 @@ class DigitalAudioWorkstation(Base):
     def __repr__(self): 
         return f'<DigitalAudioWorkstation(id={self.id}, name="{self.name}")>'
 
-# Create an engine to connect to the database
+
 engine = create_engine('sqlite:///audio_producer.db') 
 
-# Create all tables in the database
+
 Base.metadata.create_all(engine)
 
-# Create a session factory
+
 Session = sessionmaker(bind=engine)
 
-# Create a session instance
+
 session = Session() 

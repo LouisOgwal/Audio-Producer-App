@@ -4,10 +4,10 @@ from sqlalchemy.orm import sessionmaker
 from models import Base, AudioProducer, DigitalAudioWorkstation 
 from tabulate import tabulate 
 
-# Database URL (you can change this to your desired database)
+
 DATABASE_URL = "sqlite:///audio_producer_app.db"
 
-# Set up engine and session
+
 engine = create_engine(DATABASE_URL, echo=True) 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -16,7 +16,7 @@ session = Session()
 def init_database():
     """Initialize the database by creating tables."""
     try:
-        # Check if tables already exist before creating
+
         Base.metadata.create_all(engine)
         print("Database created and tables initialized.")
     except Exception as e:
@@ -35,7 +35,7 @@ def create_audio_producer():
         session.rollback()
         print(f"Error creating Audio Producer: {e}")
 
-# Update audio producer details
+
 def update_audio_producer():
     """Update audio producer details."""
     producer_id = int(input("Enter Audio Producer's ID to update: "))
@@ -54,7 +54,7 @@ def update_audio_producer():
     else:
         print("Audio Producer with that ID not found.")
 
-# Delete an audio producer
+
 def delete_audio_producer():
     """Delete an audio producer."""
     producer_id = int(input("Enter Audio Producer's ID to delete: "))
@@ -71,7 +71,7 @@ def delete_audio_producer():
     else:
         print("Audio Producer with that ID not found.")
 
-# List all audio producers
+
 def list_audio_producers():
     """List all audio producers."""
     producers = session.query(AudioProducer).all()
@@ -81,12 +81,12 @@ def list_audio_producers():
         for producer in producers:
             table_data.append([producer.id, producer.name])
 
-        # Print the table using tabulate
+    
         print(tabulate(table_data, headers='firstrow', tablefmt='grid'))
     else:
         print("No audio producers found.")
 
-# Create a new digital audio workstation
+
 def create_workstation():
     """Create a new digital audio workstation."""
     name = input("Enter Workstation's name: ")
@@ -105,7 +105,7 @@ def create_workstation():
     else:
         print(f"Audio Producer with ID {producer_id} not found. Workstation creation failed.")
 
-# Update workstation details
+
 def update_workstation():
     """Update workstation details."""
     workstation_id = int(input("Enter Workstation ID to update: "))
@@ -124,7 +124,7 @@ def update_workstation():
     else:
         print("Workstation with that ID not found.")
 
-# Delete a workstation
+
 def delete_workstation():
     """Delete a workstation."""
     workstation_id = int(input("Enter Workstation ID to delete: "))
@@ -141,22 +141,22 @@ def delete_workstation():
     else:
         print("Workstation with that ID not found.")
 
-# List all workstations
+
 def list_workstations():
     """List all workstations."""
     workstations = session.query(DigitalAudioWorkstation).all()
     if workstations:
-        # Using tabulate to format the output as a table
+        
         table_data = [['ID', 'Name', 'Producer ID']]
         for workstation in workstations:
             table_data.append([workstation.id, workstation.name, workstation.audio_producer_id])
 
-        # Print the table using tabulate
+
         print(tabulate(table_data, headers='firstrow', tablefmt='grid'))
     else:
         print("No workstations found.")
 
-# Main Menu Function
+
 def main_menu():
     """Display the main menu and handle user choices."""
     while True:
