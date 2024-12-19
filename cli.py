@@ -12,7 +12,7 @@ engine = create_engine(DATABASE_URL, echo=True)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# Initialize the database
+
 def init_database():
     """Initialize the database by creating tables."""
     try:
@@ -22,7 +22,7 @@ def init_database():
     except Exception as e:
         print(f"Error during initialization: {e}")
 
-# Create a new audio producer
+
 def create_audio_producer():
     """Create a new audio producer."""
     name = input("Enter Audio Producer's name: ")
