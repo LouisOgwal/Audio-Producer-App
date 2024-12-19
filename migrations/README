@@ -1,1 +1,46 @@
 Generic single-database configuration.
+
+# Audio Producer Management System
+
+This is a CLI-based application for managing audio producers and their associated digital audio workstations (DAWs) using Python, SQLAlchemy, and SQLite.
+
+# Table of Contents
+
+# Features
+- Create Audio Producers: Add new audio producers to the system.
+- Update Audio Producers: Modify the details of existing audio producers.
+- Delete Audio Producers: Remove audio producers from the database.
+- List Audio Producers: View a list of all audio producers in a tabulated format.
+- Create Workstations: Add new digital audio workstations (DAWs) associated with specific audio producers.
+- Update Workstations: Modify the details of existing workstations.
+- Delete Workstations: Remove workstations from the database.
+- List Workstations: View a list of all workstations in a tabulated form
+
+1. **Initialize the Database**:
+
+    python app.py
+    
+2. **Interact with the CLI**:
+
+    Follow the prompts in the main menu to perform actions like adding, updating, deleting, and listing audio producers and workstations.
+
+    #Example main menu:
+    
+    Welcome to the Audio Production System!
+    1. Add a new Audio Producer
+    2. Update Audio Producer details
+    3. Delete Audio Producer details
+    4. List all Audio Producers
+    5. Add a new Workstation
+    6. Update Workstation details
+    7. Delete Workstation details
+    8. List all Workstations
+    9. Exit
+    Enter your choice: 1
+
+
+
+
+
+
+
