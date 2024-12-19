@@ -1,13 +1,14 @@
 import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, AudioProducer, DigitalAudioWorkstation  # Assuming these models are defined in models.py
+from models import Base, AudioProducer, DigitalAudioWorkstation 
+from tabulate import tabulate 
 
 # Database URL (you can change this to your desired database)
 DATABASE_URL = "sqlite:///audio_producer_app.db"
 
 # Set up engine and session
-engine = create_engine(DATABASE_URL, echo=True)  # Set echo=True to log SQL queries
+engine = create_engine(DATABASE_URL, echo=True) 
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -75,9 +76,13 @@ def list_audio_producers():
     """List all audio producers."""
     producers = session.query(AudioProducer).all()
     if producers:
-        print("ID | Name")
+        
+        table_data = [['ID', 'Name']]  
         for producer in producers:
-            print(f"{producer.id} | {producer.name}")
+            table_data.append([producer.id, producer.name])
+
+        # Print the table using tabulate
+        print(tabulate(table_data, headers='firstrow', tablefmt='grid'))
     else:
         print("No audio producers found.")
 
@@ -141,9 +146,13 @@ def list_workstations():
     """List all workstations."""
     workstations = session.query(DigitalAudioWorkstation).all()
     if workstations:
-        print("ID | Name | Producer ID")
+        # Using tabulate to format the output as a table
+        table_data = [['ID', 'Name', 'Producer ID']]
         for workstation in workstations:
-            print(f"{workstation.id} | {workstation.name} | {workstation.audio_producer_id}")
+            table_data.append([workstation.id, workstation.name, workstation.audio_producer_id])
+
+        # Print the table using tabulate
+        print(tabulate(table_data, headers='firstrow', tablefmt='grid'))
     else:
         print("No workstations found.")
 
@@ -180,12 +189,12 @@ def main_menu():
         elif choice == "8":
             list_workstations()
         elif choice == "9":
-            print("Thank you for using the Audio Management System. Goodbye!")
+            print("Thank you for using the Audio Production System. Goodbye!")
             break
         else:
             print("Invalid choice. Please try again.")
 
-# Uncomment and run the database initialization if needed
+
 if __name__ == "__main__":
-    init_database()  # Initialize the database tables
-    main_menu()  # Start the main menu
+    init_database()  
+    main_menu() 
