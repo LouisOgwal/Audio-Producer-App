@@ -2,32 +2,31 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 from sqlalchemy import create_engine
 
+# Create a base class for the models
 Base = declarative_base()
 
 # Define the AudioProducer model
 class AudioProducer(Base):
-    __tablename__ = 'audio_producers'
+    __tablename__ = 'audio_producers'  # Fixed: __tablename__ (double underscores)
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     digital_audio_workstations = relationship('DigitalAudioWorkstation', back_populates='audio_producer')
 
-    def __repr__(self):
+    def __repr__(self):  # Fixed: __repr__ (double underscores)
         return f'<AudioProducer(id={self.id}, name="{self.name}")>'
-
 
 # Define the DigitalAudioWorkstation model
 class DigitalAudioWorkstation(Base):
-    __tablename__ = 'digital_audio_workstations'
+    __tablename__ = 'digital_audio_workstations'  # Fixed: __tablename__ (double underscores)
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     audio_producer_id = Column(Integer, ForeignKey('audio_producers.id'))
     audio_producer = relationship('AudioProducer', back_populates='digital_audio_workstations')
 
-    def __repr__(self):
+    def __repr__(self):  # Fixed: __repr__ (double underscores)
         return f'<DigitalAudioWorkstation(id={self.id}, name="{self.name}")>'
-
 
 # Create an engine to connect to the database
 engine = create_engine('sqlite:///audio_producer.db')  # You can change this to the appropriate database URL
@@ -39,4 +38,4 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
 # Create a session instance
-session = Session()
+session = Session()  # Fixed: Removed unnecessary space

@@ -3,29 +3,36 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, AudioProducer, DigitalAudioWorkstation  # Assuming these models are defined in models.py
 
-
 # Database URL (you can change this to your desired database)
 DATABASE_URL = "sqlite:///audio_producer_app.db"
 
 # Set up engine and session
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=True)  # Set echo=True to log SQL queries
 Session = sessionmaker(bind=engine)
 session = Session()
 
 # Initialize the database
 def init_database():
     """Initialize the database by creating tables."""
-    Base.metadata.create_all(engine)
-    print("Database created and tables initialized.")
+    try:
+        # Check if tables already exist before creating
+        Base.metadata.create_all(engine)
+        print("Database created and tables initialized.")
+    except Exception as e:
+        print(f"Error during initialization: {e}")
 
 # Create a new audio producer
 def create_audio_producer():
     """Create a new audio producer."""
     name = input("Enter Audio Producer's name: ")
     audio_producer = AudioProducer(name=name)
-    session.add(audio_producer)
-    session.commit()
-    print(f"Audio Producer '{name}' created successfully with ID: {audio_producer.id}")
+    try:
+        session.add(audio_producer)
+        session.commit()
+        print(f"Audio Producer '{name}' created successfully with ID: {audio_producer.id}")
+    except Exception as e:
+        session.rollback()
+        print(f"Error creating Audio Producer: {e}")
 
 # Update audio producer details
 def update_audio_producer():
@@ -35,9 +42,14 @@ def update_audio_producer():
 
     if producer:
         print(f"Updating details for Producer: {producer.name}")
-        producer.name = input(f"Enter new name (current: {producer.name}): ") or producer.name
-        session.commit()
-        print(f"Audio Producer {producer.name} updated successfully!")
+        new_name = input(f"Enter new name (current: {producer.name}): ") or producer.name
+        producer.name = new_name
+        try:
+            session.commit()
+            print(f"Audio Producer {producer.name} updated successfully!")
+        except Exception as e:
+            session.rollback()
+            print(f"Error updating Audio Producer: {e}")
     else:
         print("Audio Producer with that ID not found.")
 
@@ -48,9 +60,13 @@ def delete_audio_producer():
     producer = session.query(AudioProducer).filter(AudioProducer.id == producer_id).first()
 
     if producer:
-        session.delete(producer)
-        session.commit()
-        print(f"Audio Producer with ID {producer_id} deleted successfully.")
+        try:
+            session.delete(producer)
+            session.commit()
+            print(f"Audio Producer with ID {producer_id} deleted successfully.")
+        except Exception as e:
+            session.rollback()
+            print(f"Error deleting Audio Producer: {e}")
     else:
         print("Audio Producer with that ID not found.")
 
@@ -59,12 +75,9 @@ def list_audio_producers():
     """List all audio producers."""
     producers = session.query(AudioProducer).all()
     if producers:
-        table_data = [['ID', 'Name']]  # Table headers
+        print("ID | Name")
         for producer in producers:
-            table_data.append([producer.id, producer.name])
-
-        table = AsciiTable(table_data)  # Create the table
-        print(table.table)  # Print the table
+            print(f"{producer.id} | {producer.name}")
     else:
         print("No audio producers found.")
 
@@ -77,9 +90,13 @@ def create_workstation():
     producer = session.query(AudioProducer).filter(AudioProducer.id == producer_id).first()
     if producer:
         workstation = DigitalAudioWorkstation(name=name, audio_producer_id=producer.id)
-        session.add(workstation)
-        session.commit()
-        print(f"Workstation '{name}' created successfully under Producer '{producer.name}'")
+        try:
+            session.add(workstation)
+            session.commit()
+            print(f"Workstation '{name}' created successfully under Producer '{producer.name}'")
+        except Exception as e:
+            session.rollback()
+            print(f"Error creating Workstation: {e}")
     else:
         print(f"Audio Producer with ID {producer_id} not found. Workstation creation failed.")
 
@@ -91,9 +108,14 @@ def update_workstation():
 
     if workstation:
         print(f"Updating details for Workstation: {workstation.name}")
-        workstation.name = input(f"Enter new name (current: {workstation.name}): ") or workstation.name
-        session.commit()
-        print(f"Workstation {workstation.name} updated successfully!")
+        new_name = input(f"Enter new name (current: {workstation.name}): ") or workstation.name
+        workstation.name = new_name
+        try:
+            session.commit()
+            print(f"Workstation {workstation.name} updated successfully!")
+        except Exception as e:
+            session.rollback()
+            print(f"Error updating Workstation: {e}")
     else:
         print("Workstation with that ID not found.")
 
@@ -104,9 +126,13 @@ def delete_workstation():
     workstation = session.query(DigitalAudioWorkstation).filter(DigitalAudioWorkstation.id == workstation_id).first()
 
     if workstation:
-        session.delete(workstation)
-        session.commit()
-        print(f"Workstation with ID {workstation_id} deleted successfully.")
+        try:
+            session.delete(workstation)
+            session.commit()
+            print(f"Workstation with ID {workstation_id} deleted successfully.")
+        except Exception as e:
+            session.rollback()
+            print(f"Error deleting Workstation: {e}")
     else:
         print("Workstation with that ID not found.")
 
@@ -115,12 +141,9 @@ def list_workstations():
     """List all workstations."""
     workstations = session.query(DigitalAudioWorkstation).all()
     if workstations:
-        table_data = [['ID', 'Name', 'Producer ID']]  # Table headers
+        print("ID | Name | Producer ID")
         for workstation in workstations:
-            table_data.append([workstation.id, workstation.name, workstation.audio_producer_id])
-
-        table = AsciiTable(table_data)  # Create the table
-        print(table.table)  # Print the table
+            print(f"{workstation.id} | {workstation.name} | {workstation.audio_producer_id}")
     else:
         print("No workstations found.")
 
@@ -128,7 +151,7 @@ def list_workstations():
 def main_menu():
     """Display the main menu and handle user choices."""
     while True:
-        print("\nWelcome to the Audio Management System!")
+        print("\nWelcome to the Audio Production System!")
         print("1. Add a new Audio Producer")
         print("2. Update Audio Producer details")
         print("3. Delete Audio Producer details")
